@@ -16,7 +16,7 @@ cities :: RoadMap -> [City]
 cities rm = Data.List.sort (Data.List.nub (concatMap (\(a,b,_) -> [a,b]) rm))
 
 areAdjacent :: RoadMap -> City -> City -> Bool
-areAdjacent = undefined
+areAdjacent rm c1 c2 = Data.List.any (\(a, b, _) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance = undefined
