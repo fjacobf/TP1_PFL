@@ -13,7 +13,7 @@ type Distance = Int
 type RoadMap = [(City,City,Distance)]
 
 cities :: RoadMap -> [City]
-cities rm = Data.List.nub $ concatMap (\(a,b,_) -> [a,b]) rm
+cities rm = Data.List.sort (Data.List.nub (concatMap (\(a,b,_) -> [a,b]) rm))
 
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent = undefined
