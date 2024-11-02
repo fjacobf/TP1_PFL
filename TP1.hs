@@ -19,10 +19,11 @@ areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm c1 c2 = Data.List.any (\(a, b, _) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
 distance :: RoadMap -> City -> City -> Maybe Distance
-distance = undefined
+distance rm c1 c2 =  (\(_, _, d) -> d) <$> Data.List.find (\(a, b, d) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
 adjacent :: RoadMap -> City -> [(City,Distance)]
-adjacent = undefined
+adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d)) 
+                $ Data.List.filter (\(a, b, _) -> a == c || b == c) rm
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance = undefined
