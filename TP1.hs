@@ -1,4 +1,5 @@
 import qualified Data.List
+import Data.Graph (path)
 --import qualified Data.Array
 --import qualified Data.Bits
 
@@ -26,8 +27,12 @@ adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d))
                 $ Data.List.filter (\(a, b, _) -> a == c || b == c) rm
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
-pathDistance = undefined
-
+pathDistance _ [_] = Just 0
+pathDistance rm (x:y:ys) = do
+  d <- distance rm x y
+  rest <- pathDistance rm (y:ys)
+  return (d+rest)
+ 
 rome :: RoadMap -> [City]
 rome = undefined
 
