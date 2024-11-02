@@ -1,4 +1,4 @@
---import qualified Data.List
+import qualified Data.List
 --import qualified Data.Array
 --import qualified Data.Bits
 
@@ -13,7 +13,7 @@ type Distance = Int
 type RoadMap = [(City,City,Distance)]
 
 cities :: RoadMap -> [City]
-cities = undefined -- modifiy this line to implement the solution, for each exercise not solved, leave the function definition like this
+cities rm = Data.List.nub $ concatMap (\(a,b,_) -> [a,b]) rm
 
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent = undefined
