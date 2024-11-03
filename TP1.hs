@@ -23,7 +23,7 @@ distance :: RoadMap -> City -> City -> Maybe Distance
 distance rm c1 c2 =  (\(_, _, d) -> d) <$> Data.List.find (\(a, b, d) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
 adjacent :: RoadMap -> City -> [(City,Distance)]
-adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d)) 
+adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d))
                 $ Data.List.filter (\(a, b, _) -> a == c || b == c) rm
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
@@ -32,9 +32,12 @@ pathDistance rm (x:y:ys) = do
   d <- distance rm x y
   rest <- pathDistance rm (y:ys)
   return (d+rest)
- 
+
 rome :: RoadMap -> [City]
-rome = undefined
+rome rm = let
+  cityConnections = [(city, length(adjacent rm city)) | city <- cities rm]
+  maxconnect = maximum (map snd cityConnections)
+  in ([city | (city, count) <- cityConnections, count == maxconnect])
 
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected = undefined
