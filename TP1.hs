@@ -57,16 +57,12 @@ rome rm = let
   maxconnect = maximum (map snd cityConnections)
   in ([city | (city, count) <- cityConnections, count == maxconnect])
 
-neighborsC :: RoadMap -> City -> [City]
-neighborsC rm c =  map (\(a, b, d) -> if a == c then b else a)
-                 (Data.List.filter (\(a, b, _) -> a == c || b == c) rm)
-
 -- A basic implementation of a dfs that Recieves the RoadMap and two lists of cities and returns one of them
 dfs :: RoadMap -> [City] -> [City] -> [City]
 dfs rm [] visited = visited
 dfs rm (c:cs) visited
   | c `elem` visited = dfs rm cs visited
-  |otherwise = dfs rm (cs ++ neighborsC rm c) (c:visited)
+  |otherwise = dfs rm (cs ++ map fst (adjacent rm c)) (c:visited)
 
 -- This function basically starts the dfs with a list with the selected city and a void list.
 -- It aims to return all the cities reachable by the city in the argument
@@ -84,17 +80,17 @@ isStronglyConnected rm =
 
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath rm start end
-  | start == end = [[]]  -- Return a list with an empty path
-  | otherwise = dijkstra [(start, 0, [start])] [] -- (cidade, distância, caminho)
+  | start == end = [[]]
+  | otherwise = dijkstra [(start, 0, [start])] []
   where
     -- Algoritmo de Dijkstra
     dijkstra :: [(City, Distance, [City])] -> [(City, Distance)] -> [Path]
-    dijkstra [] _ = []  -- Caso não seja possível encontrar um caminho
+    dijkstra [] _ = []
     dijkstra ((currentCity, currentDist, path):queue) visited
-      | currentCity == end = collectShortestPaths currentDist path queue visited -- Found destination
-      | currentCity `elem` map fst visited = dijkstra queue visited -- Ignore if already visited
+      | currentCity == end = collectShortestPaths currentDist path queue visited
+      | currentCity `elem` map fst visited = dijkstra queue visited
       | otherwise =
-          let adj = adjacent rm currentCity -- Cidades vizinhas
+          let adj = adjacent rm currentCity
               newEntries = [ (neighbor, currentDist + dist, path ++ [neighbor]) 
                            | (neighbor, dist) <- adj
                            , neighbor `notElem` map fst visited
@@ -107,11 +103,8 @@ shortestPath rm start end
           minPaths = filter (\p -> case pathDistance rm p of
                                      Just d  -> d == minDist
                                      Nothing -> False) allPaths
-      in path : minPaths  -- Include the found path as well
+      in path : minPaths
 
-
--- shortestPath :: RoadMap -> City -> City -> [Path]
--- shortestPath = undefined
 
 travelSales :: RoadMap -> Path
 travelSales = undefined
