@@ -12,19 +12,34 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)]
 
+-- This function recieves the RoadMap, concatenates it in a list of Cities using concatMap and removes the duplicated cities using the function nub from Data.List
 cities :: RoadMap -> [City]
-cities rm = Data.List.sort (Data.List.nub (concatMap (\(a,b,_) -> [a,b]) rm))
+cities rm = Data.List.nub (concatMap (\(a,b,_) -> [a,b]) rm)
 
+-- This function recieves the RoadMap and two cities,
+-- it uses the function any from Data.List to return True
+-- if those cities are adjacent in the RoadMap and False otherwise.
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm c1 c2 = Data.List.any (\(a, b, _) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
+-- This funcion recieves the RoadMap and two cities and returns the distance.
+-- It does that by using the function find from Data.List to find the connection between the two cities and
+-- the function fmap to return only the distance
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance rm c1 c2 =  fmap (\(_, _, d) -> d) (Data.List.find (\(a, b, d) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm)
 
+-- This function recieves the RoapMap and a City and returns a list of tuples
+-- with the adjacent cities and the respective distance. It does that by filtering
+-- every connection related to the City passed by argument using the function filter from Data.List.!!
+-- The it uses the funcion map to correct to correct the output.
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d))
                  (Data.List.filter (\(a, b, _) -> a == c || b == c) rm)
 
+-- This function recieves a RoadMap and a Path and returns the distance of that Path.
+-- Ir does that by calling the function recursively. The first step return 0 if the path is empty.
+-- Them we calculate the distance between the first and second element using the previous function that we created.
+-- After that we apply the function pathDistance recursivelly with the second element onwards.
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance _ [_] = Just 0
 pathDistance rm (x:y:ys) = do
@@ -32,6 +47,10 @@ pathDistance rm (x:y:ys) = do
   rest <- pathDistance rm (y:ys)
   return (d+rest)
 
+-- This function recieves the RoadMap and returns the list of cities that have the most connections.
+-- It does that building a list called cityConnections that is composed of tuples with the city and
+-- the length of the result of the adjacent function that we created previouslly. Them we also create
+-- a maxconnect that recieves the maximum value of the second position of the tuples in the cityConnections list.
 rome :: RoadMap -> [City]
 rome rm = let
   cityConnections = [(city, length (adjacent rm city)) | city <- cities rm]
@@ -42,16 +61,20 @@ neighborsC :: RoadMap -> City -> [City]
 neighborsC rm c =  map (\(a, b, d) -> if a == c then b else a)
                  (Data.List.filter (\(a, b, _) -> a == c || b == c) rm)
 
-
+-- A basic implementation of a dfs that Recieves the RoadMap and two lists of cities and returns one of them
 dfs :: RoadMap -> [City] -> [City] -> [City]
 dfs rm [] visited = visited
 dfs rm (c:cs) visited
   | c `elem` visited = dfs rm cs visited
   |otherwise = dfs rm (cs ++ neighborsC rm c) (c:visited)
 
+-- This function basically starts the dfs with a list with the selected city and a void list.
+-- It aims to return all the cities reachable by the city in the argument
 reachable :: RoadMap -> City -> [City]
 reachable rm start = dfs rm [start] []
 
+-- This function uses the last two functions to test if the list of allCities, that contains all the nodes of the RoadMap passed in the argument
+-- is equal to the list of the nodes reachable trough the first city in the list.
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected rm =
   let allCities = cities rm
@@ -93,8 +116,8 @@ shortestPath rm start end
 travelSales :: RoadMap -> Path
 travelSales = undefined
 
--- tspBruteForce :: RoadMap -> Path
--- tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
+tspBruteForce :: RoadMap -> Path
+tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
 
 -- Some graphs to test your work
 gTest1 :: RoadMap
