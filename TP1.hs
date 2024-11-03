@@ -59,9 +59,28 @@ isStronglyConnected rm =
       reachableFromStart = reachable rm startCity
   in null allCities || Data.List.sort allCities == Data.List.sort reachableFromStart
 
+shortestPath :: RoadMap -> City -> City -> ([City], Distance)
+shortestPath rm start end
+  | start == end = ([], 0)
+  | otherwise = dijkstra [(start, 0, [start])] [] -- (cidade, distância, caminho)
+  where
+    -- Algoritmo de Dijkstra
+    dijkstra :: [(City, Distance, [City])] -> [(City, Distance)] -> ([City], Distance)
+    dijkstra [] _ = ([], 0)  -- Caso não seja possível encontrar um caminho
+    dijkstra ((currentCity, currentDist, path):queue) visited
+      | currentCity == end = (path, currentDist) -- Encontrou o destino
+      | currentCity `elem` map fst visited = dijkstra queue visited -- Ignora se já foi visitada
+      | otherwise =
+          let adj = adjacent rm currentCity -- Cidades vizinhas
+              newEntries = [ (neighbor, currentDist + dist, path ++ [neighbor]) 
+                           | (neighbor, dist) <- adj
+                           , neighbor `notElem` map fst visited
+                           ]
+              newQueue = Data.List.sortBy (\(_, d1, _) (_, d2, _) -> compare d1 d2) (queue ++ newEntries)
+          in dijkstra newQueue ((currentCity, currentDist) : visited)
 
-shortestPath :: RoadMap -> City -> City -> [Path]
-shortestPath = undefined
+-- shortestPath :: RoadMap -> City -> City -> [Path]
+-- shortestPath = undefined
 
 travelSales :: RoadMap -> Path
 travelSales = undefined
