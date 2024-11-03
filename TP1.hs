@@ -59,17 +59,17 @@ isStronglyConnected rm =
       reachableFromStart = reachable rm startCity
   in null allCities || Data.List.sort allCities == Data.List.sort reachableFromStart
 
-shortestPath :: RoadMap -> City -> City -> ([City], Distance)
+shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath rm start end
-  | start == end = ([], 0)
+  | start == end = [[]]  -- Return a list with an empty path
   | otherwise = dijkstra [(start, 0, [start])] [] -- (cidade, distância, caminho)
   where
     -- Algoritmo de Dijkstra
-    dijkstra :: [(City, Distance, [City])] -> [(City, Distance)] -> ([City], Distance)
-    dijkstra [] _ = ([], 0)  -- Caso não seja possível encontrar um caminho
+    dijkstra :: [(City, Distance, [City])] -> [(City, Distance)] -> [Path]
+    dijkstra [] _ = []  -- Caso não seja possível encontrar um caminho
     dijkstra ((currentCity, currentDist, path):queue) visited
-      | currentCity == end = (path, currentDist) -- Encontrou o destino
-      | currentCity `elem` map fst visited = dijkstra queue visited -- Ignora se já foi visitada
+      | currentCity == end = collectShortestPaths currentDist path queue visited -- Found destination
+      | currentCity `elem` map fst visited = dijkstra queue visited -- Ignore if already visited
       | otherwise =
           let adj = adjacent rm currentCity -- Cidades vizinhas
               newEntries = [ (neighbor, currentDist + dist, path ++ [neighbor]) 
@@ -78,6 +78,14 @@ shortestPath rm start end
                            ]
               newQueue = Data.List.sortBy (\(_, d1, _) (_, d2, _) -> compare d1 d2) (queue ++ newEntries)
           in dijkstra newQueue ((currentCity, currentDist) : visited)
+
+    collectShortestPaths minDist path queue visited =
+      let allPaths = dijkstra queue visited
+          minPaths = filter (\p -> case pathDistance rm p of
+                                     Just d  -> d == minDist
+                                     Nothing -> False) allPaths
+      in path : minPaths  -- Include the found path as well
+
 
 -- shortestPath :: RoadMap -> City -> City -> [Path]
 -- shortestPath = undefined
