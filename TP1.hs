@@ -1,6 +1,4 @@
 import qualified Data.List
-import Data.Graph (path)
-import Distribution.Compat.Graph (neighbors)
 --import qualified Data.Array
 --import qualified Data.Bits
 
