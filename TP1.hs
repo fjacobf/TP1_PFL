@@ -1,5 +1,6 @@
 import qualified Data.List
 import Data.Graph (path)
+import Distribution.Compat.Graph (neighbors)
 --import qualified Data.Array
 --import qualified Data.Bits
 
@@ -20,11 +21,11 @@ areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm c1 c2 = Data.List.any (\(a, b, _) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
 
 distance :: RoadMap -> City -> City -> Maybe Distance
-distance rm c1 c2 =  (\(_, _, d) -> d) <$> Data.List.find (\(a, b, d) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm
+distance rm c1 c2 =  fmap (\(_, _, d) -> d) (Data.List.find (\(a, b, d) -> (a == c1 && b == c2) || (a == c2 && b == c1)) rm)
 
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm c = map (\(a, b, d) -> if a == c then (b, d) else (a, d))
-                $ Data.List.filter (\(a, b, _) -> a == c || b == c) rm
+                 (Data.List.filter (\(a, b, _) -> a == c || b == c) rm)
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance _ [_] = Just 0
@@ -35,12 +36,31 @@ pathDistance rm (x:y:ys) = do
 
 rome :: RoadMap -> [City]
 rome rm = let
-  cityConnections = [(city, length(adjacent rm city)) | city <- cities rm]
+  cityConnections = [(city, length (adjacent rm city)) | city <- cities rm]
   maxconnect = maximum (map snd cityConnections)
   in ([city | (city, count) <- cityConnections, count == maxconnect])
 
+neighborsC :: RoadMap -> City -> [City]
+neighborsC rm c =  map (\(a, b, d) -> if a == c then b else a)
+                 (Data.List.filter (\(a, b, _) -> a == c || b == c) rm)
+
+
+dfs :: RoadMap -> [City] -> [City] -> [City]
+dfs rm [] visited = visited
+dfs rm (c:cs) visited
+  | c `elem` visited = dfs rm cs visited
+  |otherwise = dfs rm (cs ++ neighborsC rm c) (c:visited)
+
+reachable :: RoadMap -> City -> [City]
+reachable rm start = dfs rm [start] []
+
 isStronglyConnected :: RoadMap -> Bool
-isStronglyConnected = undefined
+isStronglyConnected rm =
+  let allCities = cities rm
+      startCity = head allCities
+      reachableFromStart = reachable rm startCity
+  in null allCities || Data.List.sort allCities == Data.List.sort reachableFromStart
+
 
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath = undefined
@@ -48,8 +68,8 @@ shortestPath = undefined
 travelSales :: RoadMap -> Path
 travelSales = undefined
 
-tspBruteForce :: RoadMap -> Path
-tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
+-- tspBruteForce :: RoadMap -> Path
+-- tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
 
 -- Some graphs to test your work
 gTest1 :: RoadMap
